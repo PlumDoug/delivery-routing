@@ -10,6 +10,10 @@ class HashTable():
     def insert(self, data):
         key = data[0]
         index = key % self.size
+        for item in self.buckets[index]:
+            if item[0] == key:
+                self.buckets[index].remove(item)
+                break
         self.buckets[index].append(data)
 
     def search(self, key):

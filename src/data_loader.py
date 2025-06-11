@@ -32,3 +32,18 @@ def load_distance_table(file_path):
                 if distance_table[i][j] == 0.0 and i != j:
                     distance_table[i][j] = float(distance_table[j][i])  # Ensure symmetry in the distance table
     return distance_table, address_list, location_name
+
+def load_trucks(file_path):
+    with open(file_path, newline='') as file:
+        reader = csv.reader(file)
+        truck1 = next(reader)[1:]
+        truck2 = next(reader)[1:]
+        truck3 = next(reader)[1:]
+        # Convert the truck data to integers
+        for i in range(len(truck1)):
+            truck1[i] = int(truck1[i])
+        for i in range(len(truck2)):
+            truck2[i] = int(truck2[i])
+        for i in range(len(truck3)):
+            truck3[i] = int(truck3[i])
+    return truck1, truck2, truck3
