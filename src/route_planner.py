@@ -5,6 +5,7 @@ def route_planner(package_data, distance_table, address_list, loaded_packages, t
     current_time = time_start
     route = []
     total_distance = 0
+    loaded_packages = loaded_packages.copy()
 
     while len(loaded_packages) > 0:
         next_closest_distance = float('inf')
