@@ -15,7 +15,7 @@ def main():
     package_data = []
     # Convert raw package data to a list of tuples with appropriate types
     # Each tuple contains: (id, address, city, zip, deadline string, weight, delivery time, 
-    # earliest start time, deadline, delivery status, truck number, start time)
+    # earliest start time, deadline, delivery status, start time, truck number, full address)
     for row in package_data_raw:
         if row[5] == "EOD":
             deadline = datetime.strptime("11:59 PM", "%I:%M %p")
@@ -27,7 +27,7 @@ def main():
             earliest_start = datetime.strptime("10:20 AM", "%I:%M %p")
         else:
             earliest_start = datetime.strptime("8:00 AM", "%I:%M %p")
-        package_data.append((row[0], row[1], row[2], row[4], row[5], row[6], None, earliest_start, deadline, "at hub", None, None))
+        package_data.append((row[0], row[1], row[2], row[4], row[5], row[6], None, earliest_start, deadline, "at hub", None, None, None))
    
     #region - debugging code
     #package_data_key = ["id", "address", "city", "zip", "deadline string", "weight", "delivery time", 
@@ -49,11 +49,19 @@ def main():
     distance_table, address_list, location_list = load_distance_table("data/distance_table.csv")
     print (f"Loaded {len(distance_table)} distance records from the CSV file.")
     
+    #add full address from location list to package table
+    for i in range(1, 40):
+        package = list(package_table.search(i))
+        #find the correct index in the address list
+        index = address_list.index(package[1])
+        package[12] = location_list[index]
+        package_table.insert(tuple(package))
+
     # region - debugging code
     # print (f"Address list: {address_list}")
     # print (f"Location list: {location_list}")
     # print (f"Distance table: {distance_table}")
-
+    #print (f"Location: {package_table.search(2)[12]}")
     # count = 0
     # for row in package_data:
     #     found = False
@@ -134,7 +142,7 @@ def main():
         if user_input == "1":
             package_status(package_table)
         elif user_input == "2":
-            time_status(route1, route2, route3, start_time_truck1, start_time_truck2, start_time_truck3)
+            time_status(package_table, route1, route2, route3, start_time_truck1, start_time_truck2, start_time_truck3)
         elif user_input == "0":
             print("Exiting program.")
             break
