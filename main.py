@@ -103,6 +103,9 @@ def main():
     # Run route planning algorithm for truck 2
     route2 = route_planner(package_table, distance_table, address_list, truck2, start_time_truck2, end_of_day)
     print("All routes planned successfully.")
+    # print(route1)
+    # print(route2)
+    # print(route3)
 
     # Assign truck numbers and start times to packages
     for package_id in truck1:

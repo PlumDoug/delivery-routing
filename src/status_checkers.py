@@ -22,9 +22,24 @@ def package_status(package_table):
                 except ValueError:
                     print("Invalid time format. Please enter the time in the format HH:MM AM/PM.")
                     continue
+
                 if input_time < package[11]: #if the input time is before the start time of the truck
-                    status = "at hub"
-                    print(f"Package ID: {package[0]}, Status: {status}, Address: {address}, Deadline: {deadline}, Expected Delivery Time: {delivery_time}, Truck: {truck_number}")
+                    #account for packages that have not yet arrived at the hub
+                    if package_id in [6, 25, 28, 32]:
+                        status = "not yet at hub"
+                        print(f"Package ID: {package[0]}, Status: {status}, Address: {address}, Deadline: {deadline}, Expected Delivery Time: {delivery_time}, Truck: {truck_number}")
+                    if package_id == 9: #account for package 9 with wrong address
+                        status = "at hub (wrong address)"
+                        address = "300 State St, Salt Lake City, UT 84103"
+                        print(f"Package ID: {package[0]}, Status: {status}, Address: {address}, Deadline: {deadline}, Expected Delivery Time: {delivery_time}, Truck: {truck_number}")
+                    else:
+                        if package_id == 9: #account for package 9 with wrong address
+                            status = "en route (wrong address)"
+                            address = "300 State St, Salt Lake City, UT 84103"
+                            print(f"Package ID: {package[0]}, Status: {status}, Address: {address}, Deadline: {deadline}, Expected Delivery Time: {delivery_time}, Truck: {truck_number}")
+                        else:
+                            status = "at hub"
+                            print(f"Package ID: {package[0]}, Status: {status}, Address: {address}, Deadline: {deadline}, Expected Delivery Time: {delivery_time}, Truck: {truck_number}")
                 elif input_time < package[6]: #if the input time is before the delivery time
                     status = "en route"
                     print(f"Package ID: {package[0]}, Status: {status}, Address: {address}, Deadline: {deadline}, Expected Delivery Time: {delivery_time}, Truck: {truck_number}")
@@ -50,6 +65,7 @@ def time_status(package_table, route1, route2, route3, start_time_truck1, start_
     truck2_distance = 0
     truck3_distance = 0
     
+    
     # Print each package's status based on the input time
     print(f"\nTruck 1: Start time - {start_time_truck1.strftime('%I:%M %p')}")
     for delivery in route1:
@@ -59,9 +75,12 @@ def time_status(package_table, route1, route2, route3, start_time_truck1, start_
         else:
             # Construct the address string
             address = (f"{package_table.search(delivery[0])[1]}, {package_table.search(delivery[0])[2]} {package_table.search(delivery[0])[3]}") #get the address of the package
-        if delivery[0] == 0: #if the package is at the hub
-            truck1_distance = delivery[3] #add the distance travelled to the hub to the total distance
-            print(f"Truck 1 returned to hub at {delivery[2].strftime('%I:%M %p')}")
+        if delivery[0] == 0:#special rules for the hub
+            if delivery[2] <= input_time: #if the input time is after the delivery time
+                truck1_distance = delivery[3] #add the distance travelled to the hub to the total distance
+                print(f"Truck 1 returned to hub at {delivery[2].strftime('%I:%M %p')}")
+            else:
+                continue
         elif input_time <= start_time_truck1: #if the input time is before the start time of truck 1
             #print the package ID, statud, address, and deadline
             print(f"{delivery[0]}: at hub, deadline: {package_table.search(delivery[0])[8].strftime('%I:%M %p')}, address: {address}") 
@@ -78,11 +97,15 @@ def time_status(package_table, route1, route2, route3, start_time_truck1, start_
             # Construct the address string
             address = (f"{package_table.search(delivery[0])[1]}, {package_table.search(delivery[0])[2]} {package_table.search(delivery[0])[3]}") #get the address of the package
         if input_time <= start_time_truck2:
+            if delivery[0] == 9: #account for package 9 with wrong address
+                address = "300 State St, Salt Lake City, UT 84103"
             print(f"{delivery[0]}: at hub, deadline: {package_table.search(delivery[0])[8].strftime('%I:%M %p')}, address: {address}")
         elif delivery[2] <= input_time:
             truck2_distance = delivery[3]
             print(f"{delivery[0]}: delivered at {delivery[2].strftime('%I:%M %p')}, deadline: {package_table.search(delivery[0])[8].strftime('%I:%M %p')}, address: {address}")
         else:
+            if delivery[0] == 9: #account for package 9 with wrong address
+                address = "300 State St, Salt Lake City, UT 84103"
             print(f"{delivery[0]}: en route, deadline: {package_table.search(delivery[0])[8].strftime('%I:%M %p')}, address: {address}")
     print(f"\nTruck 3: Start time - {start_time_truck3.strftime('%I:%M %p')}")
     for delivery in route3:
@@ -92,7 +115,10 @@ def time_status(package_table, route1, route2, route3, start_time_truck1, start_
             # Construct the address string
             address = (f"{package_table.search(delivery[0])[1]}, {package_table.search(delivery[0])[2]} {package_table.search(delivery[0])[3]}") #get the address of the package
         if input_time <= start_time_truck3:
-            print(f"{delivery[0]}: at hub, deadline: {package_table.search(delivery[0])[8].strftime('%I:%M %p')}, address: {address}")
+            if delivery[0] in [6, 25, 28, 32]:
+                print(f"{delivery[0]}: not yet at hub, deadline: {package_table.search(delivery[0])[8].strftime('%I:%M %p')}, address: {address}")
+            else:
+                print(f"{delivery[0]}: at hub, deadline: {package_table.search(delivery[0])[8].strftime('%I:%M %p')}, address: {address}")
         elif delivery[2] <= input_time:
             truck3_distance = delivery[3]
             print(f"{delivery[0]}: delivered at {delivery[2].strftime('%I:%M %p')}, deadline: {package_table.search(delivery[0])[8].strftime('%I:%M %p')}, address: {address}")
